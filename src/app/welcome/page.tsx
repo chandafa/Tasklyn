@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Icons } from '@/components/icons';
+import { GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/firebase';
 import { signInAnonymously } from 'firebase/auth';
@@ -34,7 +34,7 @@ export default function WelcomePage() {
   return (
     <div className="flex h-screen w-full flex-col items-center justify-center bg-background p-4">
       <div className="flex max-w-md flex-col items-center text-center">
-        <Icons.logo className="h-20 w-20 text-primary mb-6" />
+        <GraduationCap className="h-20 w-20 text-primary mb-6" />
         <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           Selamat Datang di Tasklyn
         </h1>
