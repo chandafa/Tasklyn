@@ -15,14 +15,22 @@ export default function MainLayout({
   const router = useRouter();
 
   useEffect(() => {
-    // If auth state is not loading and there's no user, redirect to login
-    if (!isUserLoading && !user) {
+    if (isUserLoading) {
+        return;
+    }
+    // Jika auth state tidak loading dan tidak ada user, alihkan ke login
+    if (!user) {
       router.push('/login');
+      return;
+    }
+    // Jika user ada, bukan tamu, tapi tidak punya displayName, paksa lengkapi profil
+    if (user && !user.isAnonymous && !user.displayName) {
+      router.push('/complete-profile');
     }
   }, [user, isUserLoading, router]);
 
-  // While loading, show a skeleton UI or a loading spinner
-  if (isUserLoading || !user) {
+  // Saat loading atau user tidak valid, tampilkan UI skeleton
+  if (isUserLoading || !user || (!user.isAnonymous && !user.displayName)) {
     return (
        <div className="flex flex-col min-h-screen">
         <header className="top-0 z-40 hidden h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-xl sm:flex sm:px-6">
@@ -54,7 +62,7 @@ export default function MainLayout({
     );
   }
 
-  // If user is logged in, render the main layout
+  // Jika user valid, render layout utama
   return (
     <div className="pb-24 sm:pb-0">
        <TaskReminderWatcher />

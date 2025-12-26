@@ -12,10 +12,18 @@ export default function AuthLayout({
   const router = useRouter();
 
   useEffect(() => {
-    // Setelah pengecekan selesai dan ada pengguna non-anonim, alihkan ke dasbor.
-    if (!isUserLoading && user && !user.isAnonymous) {
-      router.push('/dashboard');
+    if (isUserLoading) return;
+
+    if (user && !user.isAnonymous) {
+      // Jika pengguna sudah login tapi belum punya username, arahkan untuk melengkapi profil
+      if (!user.displayName) {
+        router.push('/complete-profile');
+      } else {
+        // Jika sudah punya username, arahkan ke dasbor
+        router.push('/dashboard');
+      }
     }
+    // Jika tidak ada user atau user anonim, biarkan di halaman login/register.
   }, [user, isUserLoading, router]);
 
   // Tampilkan layar pemuatan jika sedang memeriksa ATAU jika ada pengguna non-anonim (menunggu pengalihan).
