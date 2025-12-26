@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -26,12 +26,26 @@ import { TodaysFocusCard } from '../_components/todays-focus-card';
 import { PriorityBreakdownCard } from '../_components/priority-breakdown-card';
 import { JadwalMingguIniCard } from '../reports/_components/jadwal-minggu-ini-card';
 import { TaskListCard } from '../reports/_components/task-list-card';
+import { useUser } from '@/firebase';
 
 
 export default function DashboardPage() {
+  const { user } = useUser();
   const { tasks, stats, addTask, isLoaded, riskyTasks, todaysFocusTasks } = useTasks();
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [greeting, setGreeting] = useState('');
+
+  useEffect(() => {
+    const getGreeting = () => {
+      const hour = new Date().getHours();
+      if (hour < 12) return 'pagi';
+      if (hour < 15) return 'siang';
+      if (hour < 19) return 'sore';
+      return 'malam';
+    };
+    setGreeting(getGreeting());
+  }, []);
   
   const handleAddTask = (taskData: Omit<Task, 'id' | 'status' | 'subtasks' | 'completedAt'>) => {
     addTask(taskData);
@@ -58,6 +72,11 @@ export default function DashboardPage() {
                   <UserNav />
                 </div>
         </header>
+
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold">Hi, {user?.displayName || user?.email || 'Tamu'}</h1>
+          {greeting && <p className="text-muted-foreground">Selamat {greeting}, mau nugas apa hari ini?</p>}
+        </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
