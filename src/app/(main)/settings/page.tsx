@@ -275,6 +275,9 @@ export default function SettingsPage() {
             )}
         </CardFooter>
       </Card>
+      <div className="text-center text-sm text-muted-foreground mt-4">
+        © {new Date().getFullYear()} by chandafa - Candra Kirana
+      </div>
     </div>
   );
 }
