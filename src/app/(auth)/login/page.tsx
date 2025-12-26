@@ -27,6 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/firebase';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { Icons } from '@/components/icons';
+import { GraduationCap } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address.'),
@@ -87,7 +88,7 @@ export default function LoginPage() {
     <Card className="w-full max-w-sm">
       <CardHeader className="text-center">
         <div className="mb-4 flex justify-center">
-            <Icons.logo className="h-12 w-12" />
+            <GraduationCap className="h-12 w-12 text-primary" />
         </div>
         <CardTitle>Welcome Back</CardTitle>
         <CardDescription>Enter your credentials to access your tasks.</CardDescription>

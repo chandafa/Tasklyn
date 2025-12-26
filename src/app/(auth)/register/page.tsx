@@ -27,6 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/firebase';
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { Icons } from '@/components/icons';
+import { GraduationCap } from 'lucide-react';
 
 const registerSchema = z.object({
   email: z.string().email('Invalid email address.'),
@@ -86,7 +87,7 @@ export default function RegisterPage() {
     <Card className="w-full max-w-sm">
       <CardHeader className="text-center">
         <div className="mb-4 flex justify-center">
-            <Icons.logo className="h-12 w-12" />
+            <GraduationCap className="h-12 w-12 text-primary" />
         </div>
         <CardTitle>Create an Account</CardTitle>
         <CardDescription>Get started with Tasklyn today.</CardDescription>
