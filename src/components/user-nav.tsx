@@ -61,7 +61,6 @@ export function UserNav() {
           <DropdownMenuItem asChild>
             <Link href="/profile">Profil</Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>Penagihan</DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/settings">Pengaturan</Link>
           </DropdownMenuItem>
