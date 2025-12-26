@@ -25,13 +25,14 @@ import {
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/firebase';
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from 'firebase/auth';
 import { Icons } from '@/components/icons';
 import { GraduationCap } from 'lucide-react';
 
 const registerSchema = z.object({
-  email: z.string().email('Invalid email address.'),
-  password: z.string().min(6, 'Password must be at least 6 characters.'),
+  username: z.string().min(3, 'Username minimal 3 karakter.').max(6, 'Username maksimal 6 karakter.'),
+  email: z.string().email('Alamat email tidak valid.'),
+  password: z.string().min(6, 'Password minimal 6 karakter.'),
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -45,6 +46,7 @@ export default function RegisterPage() {
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
+      username: '',
       email: '',
       password: '',
     },
@@ -53,13 +55,14 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      await updateProfile(userCredential.user, { displayName: data.username });
       // The redirect is handled by the AuthLayout
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Registration Failed',
-        description: error.message || 'An unknown error occurred.',
+        title: 'Pendaftaran Gagal',
+        description: error.message || 'Terjadi kesalahan yang tidak diketahui.',
       });
     } finally {
         setIsLoading(false);
@@ -75,8 +78,8 @@ export default function RegisterPage() {
     } catch (error: any) {
         toast({
             variant: 'destructive',
-            title: 'Google Sign-Up Failed',
-            description: error.message || 'An unknown error occurred.',
+            title: 'Pendaftaran Google Gagal',
+            description: error.message || 'Terjadi kesalahan yang tidak diketahui.',
         });
     } finally {
         setIsGoogleLoading(false);
@@ -89,12 +92,29 @@ export default function RegisterPage() {
         <div className="mb-4 flex justify-center">
             <GraduationCap className="h-12 w-12 text-primary" />
         </div>
-        <CardTitle>Create an Account</CardTitle>
-        <CardDescription>Get started with Tasklyn today.</CardDescription>
+        <CardTitle>Buat Akun</CardTitle>
+        <CardDescription>Mulai dengan Tasklyn hari ini.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Username Anda"
+                      {...field}
+                      disabled={isLoading || isGoogleLoading}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="email"
@@ -127,7 +147,7 @@ export default function RegisterPage() {
               )}
             />
             <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
-              {isLoading ? 'Creating Account...' : 'Sign Up'}
+              {isLoading ? 'Membuat Akun...' : 'Daftar'}
             </Button>
           </form>
         </Form>
@@ -137,7 +157,7 @@ export default function RegisterPage() {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-background px-2 text-muted-foreground">
-              Or continue with
+              Atau lanjutkan dengan
             </span>
           </div>
         </div>
@@ -152,9 +172,9 @@ export default function RegisterPage() {
       </CardContent>
       <CardFooter className="flex flex-col items-center gap-4">
         <p className="text-sm text-muted-foreground">
-            Already have an account?{' '}
+            Sudah punya akun?{' '}
             <Link href="/login" className="font-medium text-primary hover:underline">
-                Sign in
+                Masuk
             </Link>
         </p>
       </CardFooter>
