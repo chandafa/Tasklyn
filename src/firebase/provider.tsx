@@ -3,7 +3,7 @@
 import React, { DependencyList, createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
 import { FirebaseApp } from 'firebase/app';
 import { Firestore } from 'firebase/firestore';
-import { Auth, User, onAuthStateChanged } from 'firebase/auth';
+import { Auth, User, onAuthStateChanged, updateProfile } from 'firebase/auth';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener'
 
 interface FirebaseProviderProps {
@@ -47,6 +47,8 @@ export interface UserHookResult { // Renamed from UserAuthHookResult for consist
   user: User | null;
   isUserLoading: boolean;
   userError: Error | null;
+  auth: Auth | null;
+  updateUserProfile: (updates: { displayName?: string, photoURL?: string }) => Promise<void>;
 }
 
 // React Context
@@ -170,7 +172,17 @@ export function useMemoFirebase<T>(factory: () => T, deps: DependencyList): T | 
  * This provides the User object, loading status, and any auth errors.
  * @returns {UserHookResult} Object with user, isUserLoading, userError.
  */
-export const useUser = (): UserHookResult => { // Renamed from useAuthUser
-  const { user, isUserLoading, userError } = useFirebase(); // Leverages the main hook
-  return { user, isUserLoading, userError };
+export const useUser = (): UserHookResult => {
+  const { user, isUserLoading, userError, auth } = useFirebase();
+  
+  const updateUserProfile = async (updates: { displayName?: string, photoURL?: string }) => {
+    if (auth?.currentUser) {
+      await updateProfile(auth.currentUser, updates);
+      // The onAuthStateChanged listener will handle the state update automatically.
+    } else {
+      throw new Error("User not signed in.");
+    }
+  };
+
+  return { user, isUserLoading, userError, auth, updateUserProfile };
 };

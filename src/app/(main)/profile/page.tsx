@@ -23,23 +23,62 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
+import { updateProfile } from 'firebase/auth';
 
 export default function ProfilePage() {
-  const { user } = useUser();
+  const { user, auth } = useUser();
   const router = useRouter();
+  const { toast } = useToast();
+  
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [username, setUsername] = useState(user?.displayName || '');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     // Generate a new random cat image URL on component mount
     setAvatarUrl(`https://cataas.com/cat?_=${new Date().getTime()}`);
-  }, []);
+    if (user) {
+        setUsername(user.displayName || '');
+    }
+  }, [user]);
 
   const handleAvatarChange = () => {
     // Generate a new random cat image URL on button click
     setAvatarUrl(`https://cataas.com/cat?_=${new Date().getTime()}`);
   };
+
+  const handleSaveUsername = async () => {
+      if (!user || !auth) return;
+      if (username.length < 3 || username.length > 20) {
+          toast({
+              variant: 'destructive',
+              title: 'Username tidak valid',
+              description: 'Username harus terdiri dari 3 hingga 20 karakter.'
+          });
+          return;
+      }
+      setIsSaving(true);
+      try {
+          await updateProfile(auth.currentUser!, { displayName: username });
+          toast({
+              title: 'Sukses!',
+              description: 'Username Anda telah diperbarui.'
+          });
+          // Refresh state if needed, though onAuthStateChanged should handle it
+      } catch (error: any) {
+          toast({
+              variant: 'destructive',
+              title: 'Gagal memperbarui username',
+              description: error.message || 'Terjadi kesalahan.'
+          });
+      } finally {
+          setIsSaving(false);
+      }
+  }
 
   return (
     <div className="space-y-6">
@@ -71,9 +110,16 @@ export default function ProfilePage() {
               </AvatarFallback>
             </Avatar>
             <div className="space-y-2 text-center">
-              <h3 className="text-xl font-semibold">
-                {user?.displayName || user?.email}
-              </h3>
+              <div className="flex items-center gap-2">
+                <Input 
+                    id="username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="text-xl font-semibold text-center h-10"
+                    placeholder="Username Anda"
+                />
+              </div>
+              <p className="text-sm text-muted-foreground">{user?.email}</p>
               <Button variant="outline" onClick={handleAvatarChange}>Ubah Avatar</Button>
             </div>
           </div>
@@ -147,7 +193,10 @@ export default function ProfilePage() {
           </div>
         </CardContent>
         <CardFooter className="flex justify-end">
-          <Button>Simpan Perubahan</Button>
+          <Button onClick={handleSaveUsername} disabled={isSaving}>
+            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Simpan Perubahan
+          </Button>
         </CardFooter>
       </Card>
     </div>
