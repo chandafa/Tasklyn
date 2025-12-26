@@ -23,10 +23,11 @@ export default function WelcomePage() {
         localStorage.setItem('hasVisited', 'true');
         router.push('/dashboard');
     } catch (error: any) {
+        console.error("Anonymous sign-in failed:", error);
         toast({
             variant: "destructive",
             title: "Gagal Masuk sebagai Tamu",
-            description: "Tidak dapat masuk sebagai tamu. Silakan coba lagi."
+            description: error.message || "Tidak dapat masuk sebagai tamu. Silakan coba lagi."
         });
     }
   };
