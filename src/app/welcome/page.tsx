@@ -36,7 +36,7 @@ export default function WelcomePage() {
       <div className="flex max-w-md flex-col items-center text-center">
         <Icons.logo className="h-20 w-20 text-primary mb-6" />
         <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          Selamat Datang di TaskVerse
+          Selamat Datang di Tasklyn
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
           Atur tugas Anda dengan mudah dan tingkatkan produktivitas Anda.

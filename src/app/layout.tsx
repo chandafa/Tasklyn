@@ -6,7 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
-  title: 'TaskVerse',
+  title: 'Tasklyn',
   description: 'Manage your tasks with ease.',
 };
 

@@ -89,7 +89,7 @@ export default function RegisterPage() {
             <Icons.logo className="h-12 w-12" />
         </div>
         <CardTitle>Create an Account</CardTitle>
-        <CardDescription>Get started with TaskVerse today.</CardDescription>
+        <CardDescription>Get started with Tasklyn today.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>

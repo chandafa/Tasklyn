@@ -43,7 +43,7 @@ const formattedDefaultTemplates: Template[] = defaultTemplates.map((dt, index) =
     id: `default-${index}`,
     title: dt.title,
     description: dt.description,
-    authorName: 'TaskVerse',
+    authorName: 'Tasklyn',
     published: true,
     category: dt.tasks[0]?.tags[0] || 'organisasi',
     tasks: dt.tasks.map(t => ({...t})),
