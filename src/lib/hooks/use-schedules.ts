@@ -11,6 +11,7 @@ import {
   collection,
   doc,
   serverTimestamp,
+  writeBatch,
 } from 'firebase/firestore';
 import {
   addDocumentNonBlocking,
@@ -64,12 +65,28 @@ export function useSchedules() {
     [firestore, user, toast]
   );
 
+  const deleteAllSchedules = useCallback(async () => {
+    if (!user || !firestore || !schedules) return;
+
+    if (schedules.length === 0) return;
+
+    const batch = writeBatch(firestore);
+    schedules.forEach(schedule => {
+        const scheduleRef = doc(firestore, 'users', user.uid, 'schedules', schedule.id);
+        batch.delete(scheduleRef);
+    });
+
+    await batch.commit();
+  }, [firestore, user, schedules]);
+
+
   return {
     schedules: schedules || [],
     isLoading,
     addSchedule,
     updateSchedule,
     deleteSchedule,
+    deleteAllSchedules,
   };
 }
     

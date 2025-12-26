@@ -11,6 +11,7 @@ import {
   collection,
   doc,
   serverTimestamp,
+  writeBatch
 } from 'firebase/firestore';
 import {
   addDocumentNonBlocking,
@@ -74,11 +75,26 @@ export function useNotes() {
     toast({ title: "Catatan Dihapus!" });
   }, [firestore, user, toast]);
 
+  const deleteAllNotes = useCallback(async () => {
+    if (!user || !firestore || !notes) return;
+
+    if (notes.length === 0) return;
+
+    const batch = writeBatch(firestore);
+    notes.forEach(note => {
+        const noteRef = doc(firestore, 'users', user.uid, 'notes', note.id);
+        batch.delete(noteRef);
+    });
+
+    await batch.commit();
+  }, [firestore, user, notes]);
+
   return {
     notes: sortedNotes,
     isLoading,
     addNote,
     updateNote,
     deleteNote,
+    deleteAllNotes,
   };
 }

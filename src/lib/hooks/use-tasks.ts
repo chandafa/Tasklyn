@@ -197,6 +197,21 @@ export function useTasks() {
     [firestore, user]
   );
 
+  const deleteAllTasks = useCallback(async () => {
+    if (!user || !firestore || !rawTasks) return;
+
+    if (rawTasks.length === 0) return; // No tasks to delete
+
+    const batch = writeBatch(firestore);
+    rawTasks.forEach(task => {
+        const taskRef = doc(firestore, 'users', user.uid, 'tasks', task.id);
+        batch.delete(taskRef);
+    });
+
+    await batch.commit();
+  }, [firestore, user, rawTasks]);
+
+
   const todaysFocusTasks = useMemo(() => {
     if (!tasks) return [];
     const priorityOrder = { High: 1, Medium: 2, Low: 3 };
@@ -360,6 +375,7 @@ export function useTasks() {
     addMultipleTasks, 
     updateTask,
     reorderTasks,
-    deleteTask 
+    deleteTask,
+    deleteAllTasks
   };
 }

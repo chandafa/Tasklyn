@@ -25,14 +25,37 @@ import { Button } from '@/components/ui/button';
 import { useAuth, useUser } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { LogIn, LogOut, UserCheck } from 'lucide-react';
+import { LogIn, LogOut, UserCheck, Trash2, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { useTasks } from '@/lib/hooks/use-tasks';
+import { useNotes } from '@/lib/hooks/use-notes';
+import { useSchedules } from '@/lib/hooks/use-schedules';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+
 
 export default function SettingsPage() {
   const { settings, setSetting } = useSettings();
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const { deleteAllTasks } = useTasks();
+  const { deleteAllNotes } = useNotes();
+  const { deleteAllSchedules } = useSchedules();
 
   const handleLogout = () => {
     signOut(auth);
@@ -43,6 +66,30 @@ export default function SettingsPage() {
     router.push('/login');
   };
   
+  const handleDeleteAllData = async () => {
+    setIsDeleting(true);
+    try {
+        await Promise.all([
+            deleteAllTasks(),
+            deleteAllNotes(),
+            deleteAllSchedules()
+        ]);
+        toast({
+            title: "Data Dihapus",
+            description: "Semua data Anda telah berhasil dihapus.",
+        });
+    } catch (error) {
+        console.error("Error deleting all data:", error);
+        toast({
+            variant: "destructive",
+            title: "Gagal Menghapus Data",
+            description: "Terjadi kesalahan saat menghapus data Anda. Silakan coba lagi.",
+        });
+    } finally {
+        setIsDeleting(false);
+    }
+  };
+
   if (isUserLoading || !settings) {
     return (
        <Card>
@@ -169,18 +216,44 @@ export default function SettingsPage() {
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end border-t pt-6">
-          {user && !user.isAnonymous ? (
-            <Button variant="destructive" onClick={handleLogout} className="mt-4">
-              <LogOut className="mr-2 h-4 w-4" />
-              Keluar
-            </Button>
-          ) : (
-            <Button onClick={handleLogin} className="mt-4">
-              <LogIn className="mr-2 h-4 w-4" />
-              Masuk untuk Menyimpan Data
-            </Button>
-          )}
+        <CardFooter className="flex justify-end border-t pt-6 gap-2">
+            {user && !user.isAnonymous ? (
+                <>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Hapus Data
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Apakah Anda benar-benar yakin?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Tindakan ini tidak dapat dibatalkan. Ini akan menghapus semua tugas, catatan, dan jadwal Anda secara permanen.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Batal</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDeleteAllData} disabled={isDeleting}>
+                                     {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                    Ya, Hapus Semua
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+
+                    <Button variant="outline" onClick={handleLogout}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Keluar
+                    </Button>
+                </>
+            ) : (
+                <Button onClick={handleLogin}>
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Masuk untuk Menyimpan Data
+                </Button>
+            )}
         </CardFooter>
       </Card>
     </div>
