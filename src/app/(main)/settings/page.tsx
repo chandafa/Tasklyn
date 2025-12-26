@@ -43,6 +43,7 @@ import { useNotes } from '@/lib/hooks/use-notes';
 import { useSchedules } from '@/lib/hooks/use-schedules';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { Switch } from '@/components/ui/switch';
 
 
 export default function SettingsPage() {
@@ -213,6 +214,24 @@ export default function SettingsPage() {
                         </div>
                     </RadioGroup>
                  </div>
+            </div>
+          </div>
+          <Separator />
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Notifikasi</h3>
+            <div className="p-4 border rounded-lg flex items-center justify-between">
+              <div>
+                <Label
+                  htmlFor="push-notifications"
+                  className="font-semibold"
+                >
+                  Notifikasi Push
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  Terima notifikasi di perangkat Anda.
+                </p>
+              </div>
+              <Switch id="push-notifications" />
             </div>
           </div>
         </CardContent>
