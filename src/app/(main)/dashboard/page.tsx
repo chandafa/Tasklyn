@@ -75,7 +75,7 @@ export default function DashboardPage() {
 
         <div className="space-y-2">
           <h1 className="text-2xl font-bold">Hi, {user?.displayName || user?.email || 'Tamu'}</h1>
-          {greeting && <p className="text-muted-foreground">Selamat {greeting}, mau nugas apa hari ini?</p>}
+          {greeting && <p className="text-sm text-muted-foreground md:text-base">Selamat {greeting}, mau nugas apa hari ini?</p>}
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
