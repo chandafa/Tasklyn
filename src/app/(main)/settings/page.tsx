@@ -171,12 +171,12 @@ export default function SettingsPage() {
         </CardContent>
         <CardFooter className="flex justify-center border-t pt-6">
           {user && !user.isAnonymous ? (
-            <Button variant="destructive" onClick={handleLogout}>
+            <Button variant="destructive" onClick={handleLogout} className="mt-4">
               <LogOut className="mr-2 h-4 w-4" />
               Keluar
             </Button>
           ) : (
-            <Button onClick={handleLogin}>
+            <Button onClick={handleLogin} className="mt-4">
               <LogIn className="mr-2 h-4 w-4" />
               Masuk untuk Menyimpan Data
             </Button>
