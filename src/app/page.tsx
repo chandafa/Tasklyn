@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Icons } from '@/components/icons';
+import { GraduationCap } from 'lucide-react';
 import { useUser } from '@/firebase';
 
 export default function SplashPage() {
@@ -36,7 +36,7 @@ export default function SplashPage() {
   return (
     <div className="flex h-screen w-full flex-col items-center justify-center bg-background text-foreground">
       <div className="flex flex-col items-center gap-6">
-        <Icons.logo className="h-24 w-24 text-primary animate-pulse" />
+        <GraduationCap className="h-24 w-24 text-primary animate-pulse" />
         <h1 className="text-3xl font-bold text-gradient">Tasklyn</h1>
       </div>
     </div>
