@@ -25,11 +25,12 @@ import { Button } from '@/components/ui/button';
 import { useAuth, useUser } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { LogIn, LogOut } from 'lucide-react';
+import { LogIn, LogOut, UserCheck } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function SettingsPage() {
   const { settings, setSetting } = useSettings();
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
 
@@ -42,8 +43,49 @@ export default function SettingsPage() {
     router.push('/login');
   };
   
-  if (!settings) {
-    return null; // or a loading skeleton
+  if (isUserLoading || !settings) {
+    return (
+       <Card>
+        <CardHeader>
+          <Skeleton className="h-7 w-2/5" />
+          <Skeleton className="h-4 w-4/5" />
+        </CardHeader>
+        <CardContent className="space-y-6">
+           <Skeleton className="h-24 w-full" />
+           <Skeleton className="h-24 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Jika pengguna adalah tamu, tampilkan pesan untuk login
+  if (user && user.isAnonymous) {
+    return (
+       <Card className="text-center">
+        <CardHeader>
+            <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit mb-2">
+                <UserCheck className="h-8 w-8 text-primary" />
+            </div>
+            <CardTitle>Buat Akun untuk Melanjutkan</CardTitle>
+            <CardDescription>
+                Untuk menyimpan pengaturan Anda dan mengakses semua fitur, silakan buat akun atau masuk.
+            </CardDescription>
+        </CardHeader>
+        <CardContent>
+            <p className="text-sm text-muted-foreground">
+                Data Anda sebagai tamu bersifat sementara. Membuat akun memastikan pekerjaan Anda aman.
+            </p>
+        </CardContent>
+        <CardFooter className="flex-col gap-3">
+            <Button onClick={() => router.push('/register')} className="w-full">
+                Buat Akun Baru
+            </Button>
+            <Button variant="ghost" onClick={() => router.push('/login')}>
+                Sudah Punya Akun? Masuk
+            </Button>
+        </CardFooter>
+      </Card>
+    )
   }
 
   return (
