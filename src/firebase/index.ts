@@ -19,10 +19,20 @@ export function initializeFirebase() {
     } catch (e) {
       // Only warn in production because it's normal to use the firebaseConfig to initialize
       // during development
-      if (process.env.NODE_ENV === "production") {
-        console.warn('Automatic initialization failed. Falling back to firebase config object.', e);
+      if (process.env.NODE_ENV === "production" && (!firebaseConfig.apiKey || !firebaseConfig.projectId)) {
+        console.error('Automatic initialization failed, and environment variables are missing. Falling back to hardcoded config might not be possible.');
       }
-      firebaseApp = initializeApp(firebaseConfig);
+      
+      // Fallback to config from .env file if available
+      if (firebaseConfig.apiKey && firebaseConfig.projectId) {
+          firebaseApp = initializeApp(firebaseConfig);
+      } else {
+          // This block will run if initialization via App Hosting fails AND .env variables are missing.
+          console.error("Firebase initialization failed. Ensure your environment variables are set correctly or your App Hosting setup is complete.");
+          // To prevent a hard crash, we can try to initialize with a fallback, but this is not ideal.
+          // For this app, we'll throw an error if we can't initialize.
+          throw new Error("Could not initialize Firebase. Please check your configuration.");
+      }
     }
 
     return getSdks(firebaseApp);
