@@ -64,7 +64,7 @@ export default function DashboardPage() {
         </div>
       </header>
       <div className="p-0 sm:p-0 space-y-6">
-         <header className="top-0 z-40 hidden h-16 items-center gap-4 border-b bg-background/80 px-6 backdrop-blur-xl sm:flex sm:px-6 sm:border-none sm:bg-transparent sm:backdrop-blur-none sm:-mx-6 sm:-mt-6 mb-6">
+         <header className="top-0 z-40 hidden h-16 items-center gap-4 sm:flex sm:px-0 sm:border-none sm:bg-transparent sm:backdrop-blur-none sm:-mx-0 sm:-mt-6 mb-0">
                   <div className="flex items-center justify-center h-10 w-10 border rounded-md">
                     <GraduationCap className="h-6 w-6 text-primary" />
                   </div>
@@ -74,7 +74,7 @@ export default function DashboardPage() {
         </header>
 
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">Hi, {user?.displayName || user?.email || 'Tamu'}</h1>
+          <h1 className="text-2xl font-bold">Hi, {user?.displayName || 'Tamu'}</h1>
           {greeting && <p className="text-sm text-muted-foreground md:text-base">Selamat {greeting}, mau nugas apa hari ini?</p>}
         </div>
 
