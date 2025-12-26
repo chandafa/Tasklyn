@@ -169,7 +169,7 @@ export default function SettingsPage() {
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end border-t pt-6">
+        <CardFooter className="flex justify-center border-t pt-6">
           {user && !user.isAnonymous ? (
             <Button variant="destructive" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
