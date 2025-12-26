@@ -1,0 +1,145 @@
+/**
+ * Core Philosophy: This ruleset enforces a strict user-ownership model for personal data
+ * (tasks, tags, notes) and a membership-based model for collaborative data (workspaces).
+ *
+ * Data Structure:
+ * - Personal data: `/users/{userId}/...` is private to that user.
+ * - Collaborative data: `/workspaces/{workspaceId}/...` is accessible to members of that workspace.
+ *
+ * Key Security Decisions:
+ * - Strict Data Isolation: Users can only access their own data or data in workspaces they are members of.
+ * - Ownership & Membership: Authorization relies on stable user UIDs and workspace membership checks.
+ * - No Public Listing: It is impossible to list all users or all workspaces.
+ * - Schema validation is not enforced at this stage to allow for rapid prototyping.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // -------------------------------------------------------------------------
+    // Helper Functions
+    // -------------------------------------------------------------------------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function hasEmail() {
+      return isSignedIn() && request.auth.token.email != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    function isWorkspaceMember(workspaceId) {
+      return isSignedIn() && exists(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid));
+    }
+    
+    function isWorkspaceOwner(workspaceId) {
+      // Use get() instead of exists() to access member data
+      let memberDoc = get(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid));
+      return memberDoc.data.role == 'owner';
+    }
+
+
+    // -------------------------------------------------------------------------
+    // User-Specific Data Rules (Private)
+    // -------------------------------------------------------------------------
+
+    match /users/{userId} {
+      allow read, write: if false; // Container only, no direct access
+    }
+
+    match /users/{userId}/tasks/{taskId} {
+      allow read, list, create, update, delete: if isOwner(userId);
+    }
+
+    match /users/{userId}/tags/{tagId} {
+      allow read, list, create, update, delete: if isOwner(userId);
+    }
+
+    match /users/{userId}/notes/{noteId} {
+      allow read, list, create, update, delete: if isOwner(userId);
+    }
+    
+    match /users/{userId}/schedules/{scheduleId} {
+      allow read, list, create, update, delete: if isOwner(userId);
+    }
+    
+    // -------------------------------------------------------------------------
+    // Workspace & Collaboration Rules
+    // -------------------------------------------------------------------------
+    
+    match /workspaces/{workspaceId} {
+      // Anyone signed in can create a workspace, as long as they provide their UID
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      // Only members can read workspace details
+      allow read: if isWorkspaceMember(workspaceId);
+      // Only the owner can update or delete the workspace
+      allow update, delete: if isWorkspaceOwner(workspaceId);
+    }
+    
+    match /workspaces/{workspaceId}/members/{memberUserId} {
+        // Owner can add/remove members
+        allow create, delete: if isWorkspaceOwner(workspaceId);
+        // All members can see the list of other members
+        allow read, list: if isWorkspaceMember(workspaceId);
+        // Members cannot update roles directly.
+        allow update: if false;
+    }
+    
+    match /workspaces/{workspaceId}/tasks/{taskId} {
+        // Any member of the workspace can manage tasks
+        allow read, list, create, update, delete: if isWorkspaceMember(workspaceId);
+    }
+    
+    // -------------------------------------------------------------------------
+    // Invitation and Membership Lookup Rules
+    // -------------------------------------------------------------------------
+    
+    match /invitations/{invitationId} {
+        // User can read their own invitation doc
+        allow get: if hasEmail() && request.auth.token.email == resource.data.inviteeEmail;
+        // User can list only invitations sent to them
+        allow list: if hasEmail() && request.query.where.get('inviteeEmail', '') == request.auth.token.email;
+        // Workspace members can create invitations
+        allow create: if hasEmail() && isWorkspaceMember(request.resource.data.workspaceId);
+        // The invitee can update the status (accept/decline)
+        allow update: if hasEmail() && request.auth.token.email == resource.data.inviteeEmail;
+        // Deletion is disallowed to preserve history
+        allow delete: if false;
+    }
+    
+    // This collection is a lookup table to find which workspaces a user is in.
+    // It's managed by backend logic (via batch writes) when a user joins a workspace.
+    match /members/{membershipId} {
+        // A user can read their own membership entries to find their workspaces
+        allow read: if isSignedIn() && request.auth.uid == resource.data.userId;
+        // Creation and deletion is handled server-side via batch writes when accepting invites
+        // or creating workspaces, where the main action is already authenticated.
+        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+        // No direct updates or global lists for security.
+        allow list, update, delete: if false;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Community Templates Rules
+    // -------------------------------------------------------------------------
+
+    match /templates/{templateId} {
+      // Anyone can read/list templates that are marked as published.
+      allow get: if resource.data.published == true;
+      allow list: if request.query.where.get('published', false) == true;
+
+      // Authenticated users can create templates, but must set themselves as author
+      // and templates must be unpublished by default.
+      allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid && request.resource.data.published == false;
+
+      // Only the author of a template can update or delete it.
+      allow update, delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+    }
+  }
+}
+
+    
