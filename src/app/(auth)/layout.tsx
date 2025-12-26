@@ -12,23 +12,25 @@ export default function AuthLayout({
   const router = useRouter();
 
   useEffect(() => {
-    // Jika pengecekan selesai dan pengguna sudah ada (login), alihkan ke dasbor.
+    // Setelah pengecekan selesai dan pengguna dikonfirmasi ada (sudah login),
+    // baru alihkan ke dasbor.
     if (!isUserLoading && user) {
       router.push('/dashboard');
     }
   }, [user, isUserLoading, router]);
 
-  // Hanya tampilkan layar pemuatan jika pengguna sudah login (dan sedang akan dialihkan).
-  // Jangan blokir render saat isUserLoading.
-  if (user) {
+  // Tampilkan layar pemuatan HANYA jika kita sedang dalam proses memeriksa
+  // atau jika kita sudah tahu ada pengguna dan sedang proses pengalihan.
+  if (isUserLoading || user) {
     return (
-      <div className="flex h-screen w-full items-center justify-center">
+      <div className="flex h-screen w-full items-center justify-center bg-background">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
   }
 
-  // Jika belum login atau masih loading, tampilkan konten halaman (login/register).
+  // Jika pengecekan selesai dan dipastikan tidak ada pengguna, tampilkan
+  // konten halaman (formulir login/register).
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       {children}
